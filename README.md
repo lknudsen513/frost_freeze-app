@@ -358,3 +358,4 @@ For issues or questions:
 - Weather data: National Weather Service (NWS) API
 - ZIP code geocoding: Zippopotam.us
 - Built with Node.js, Express, and vanilla JavaScript
+"# frost_freeze-app" 
