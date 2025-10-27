@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frost & Freeze Alert - Cloud Edition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #1a202c;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 32px;
+            font-size: 15px;
+        }
+
+        .cloud-badge {
+            display: inline-block;
+            background: #edf2f7;
+            color: #4a5568;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            color: #2d3748;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="email"] {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+            display: none;
+        }
+
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            display: none;
+            margin-top: 24px;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .status-badge.clear {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-badge.alert {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .result-header {
+            margin-bottom: 20px;
+        }
+
+        .result-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 8px;
+        }
+
+        .result-location {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .alert-card {
+            background: #f7fafc;
+            border-left: 4px solid #f56565;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .alert-type {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 12px;
+        }
+
+        .alert-section {
+            margin-bottom: 16px;
+        }
+
+        .alert-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #4a5568;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .section-content {
+            color: #2d3748;
+            line-height: 1.6;
+            font-size: 15px;
+        }
+
+        .plain-english {
+            background: #edf2f7;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .metadata {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .metadata-item {
+            font-size: 13px;
+        }
+
+        .metadata-label {
+            color: #718096;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .metadata-value {
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .email-signup {
+            margin-top: 32px;
+            padding-top: 32px;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .email-signup-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 8px;
+        }
+
+        .email-signup-desc {
+            color: #718096;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        .email-form {
+            display: flex;
+            gap: 8px;
+        }
+
+        .email-form input {
+            flex: 1;
+        }
+
+        .email-form button {
+            width: auto;
+            padding: 14px 24px;
+        }
+
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 12px;
+            display: none;
+            font-size: 14px;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+            display: none;
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 24px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .email-form {
+                flex-direction: column;
+            }
+
+            .email-form button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div style="text-align: center;">
+            <span class="cloud-badge">☁️ Fully Cloud-Based</span>
+        </div>
+        <h1>❄️ Frost & Freeze Alert</h1>
+        <p class="subtitle">Check for frost and freeze advisories in your area</p>
+
+        <form id="zipForm" onsubmit="checkAlerts(event)">
+            <div class="form-group">
+                <label for="zipCode">Enter Your ZIP Code</label>
+                <input 
+                    type="text" 
+                    id="zipCode" 
+                    placeholder="e.g., 60601" 
+                    pattern="[0-9]{5}" 
+                    maxlength="5"
+                    required
+                    autocomplete="postal-code"
+                >
+            </div>
+            <button type="submit" id="checkBtn">Check for Alerts</button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="color: #718096;">Checking for alerts...</p>
+        </div>
+
+        <div class="result" id="result"></div>
+        <div class="error" id="error"></div>
+
+        <div class="email-signup" id="emailSignup" style="display: none;">
+            <h3 class="email-signup-title">📧 Get Daily Email Alerts</h3>
+            <p class="email-signup-desc">Receive a summary every morning at 8:00 AM EST</p>
+            <form class="email-form" id="emailForm" onsubmit="subscribeEmail(event)">
+                <input 
+                    type="email" 
+                    id="emailInput" 
+                    placeholder="your@email.com" 
+                    required
+                    autocomplete="email"
+                >
+                <button type="submit" id="subscribeBtn">Subscribe</button>
+            </form>
+            <div class="success-message" id="emailSuccess">✓ Successfully subscribed!</div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration - API base URL (automatically set for Vercel)
+        const API_BASE_URL = window.location.origin + '/api';
+        
+        const FROST_FREEZE_KEYWORDS = [
+            'frost', 'freeze', 'freezing', 'hard freeze', 'killing frost'
+        ];
+
+        let currentZipCode = null;
+
+        // Utility Functions
+        function showElement(id) {
+            document.getElementById(id).style.display = 'block';
+        }
+
+        function hideElement(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        function showLoading() {
+            hideElement('result');
+            hideElement('error');
+            hideElement('emailSignup');
+            showElement('loading');
+            document.getElementById('checkBtn').disabled = true;
+        }
+
+        function hideLoading() {
+            hideElement('loading');
+            document.getElementById('checkBtn').disabled = false;
+        }
+
+        function showError(message) {
+            hideLoading();
+            const errorEl = document.getElementById('error');
+            errorEl.textContent = message;
+            showElement('error');
+        }
+
+        // Main Alert Checking Function
+        async function checkAlerts(event) {
+            event.preventDefault();
+            
+            const zipCode = document.getElementById('zipCode').value.trim();
+            
+            if (!/^\d{5}$/.test(zipCode)) {
+                showError('Please enter a valid 5-digit ZIP code.');
+                return;
+            }
+
+            currentZipCode = zipCode;
+            showLoading();
+
+            try {
+                // Step 1: Convert ZIP to coordinates
+                const geoResponse = await fetch(`https://api.zippopotam.us/us/${zipCode}`);
+                
+                if (!geoResponse.ok) {
+                    throw new Error('Invalid ZIP code or ZIP code not found.');
+                }
+
+                const geoData = await geoResponse.json();
+                const latitude = parseFloat(geoData.places[0].latitude);
+                const longitude = parseFloat(geoData.places[0].longitude);
+                const city = geoData.places[0]['place name'];
+                const state = geoData.places[0]['state abbreviation'];
+
+                // Step 2: Get NWS data
+                const pointResponse = await fetch(
+                    `https://api.weather.gov/points/${latitude.toFixed(4)},${longitude.toFixed(4)}`,
+                    {
+                        headers: {
+                            'User-Agent': 'FrostFreezeChecker/2.0',
+                            'Accept': 'application/geo+json'
+                        }
+                    }
+                );
+
+                if (!pointResponse.ok) {
+                    throw new Error('Unable to fetch weather data for this location.');
+                }
+
+                const pointData = await pointResponse.json();
+                const forecastZone = pointData.properties.forecastZone;
+
+                // Step 3: Get active alerts
+                const alertsResponse = await fetch(
+                    `https://api.weather.gov/alerts/active?zone=${forecastZone.split('/').pop()}`,
+                    {
+                        headers: {
+                            'User-Agent': 'FrostFreezeChecker/2.0',
+                            'Accept': 'application/geo+json'
+                        }
+                    }
+                );
+
+                if (!alertsResponse.ok) {
+                    throw new Error('Unable to fetch weather alerts.');
+                }
+
+                const alertsData = await alertsResponse.json();
+
+                // Step 4: Filter frost/freeze alerts
+                const frostFreezeAlerts = alertsData.features.filter(alert => {
+                    const event = alert.properties.event.toLowerCase();
+                    const headline = (alert.properties.headline || '').toLowerCase();
+                    const description = (alert.properties.description || '').toLowerCase();
+                    
+                    return FROST_FREEZE_KEYWORDS.some(keyword => 
+                        event.includes(keyword) || 
+                        headline.includes(keyword) || 
+                        description.includes(keyword)
+                    );
+                });
+
+                // Step 5: Display results
+                displayResults(frostFreezeAlerts, { city, state });
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError(error.message || 'An error occurred. Please try again.');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Display Results with Plain English Translation
+        function displayResults(alerts, location) {
+            const resultEl = document.getElementById('result');
+            resultEl.innerHTML = '';
+
+            if (alerts.length === 0) {
+                resultEl.innerHTML = `
+                    <div class="result-header">
+                        <span class="status-badge clear">✓ All Clear</span>
+                        <div class="result-title">No Frost or Freeze Alerts</div>
+                        <div class="result-location">📍 ${location.city}, ${location.state}</div>
+                    </div>
+                    <div class="alert-card" style="border-left-color: #48bb78;">
+                        <div class="section-content">
+                            There are currently no frost or freeze advisories, watches, or warnings in effect for your location.
+                        </div>
+                    </div>
+                `;
+            } else {
+                let alertsHTML = `
+                    <div class="result-header">
+                        <span class="status-badge alert">⚠️ Alert Active</span>
+                        <div class="result-title">${alerts.length} Frost/Freeze ${alerts.length === 1 ? 'Alert' : 'Alerts'}</div>
+                        <div class="result-location">📍 ${location.city}, ${location.state}</div>
+                    </div>
+                `;
+
+                alerts.forEach(alert => {
+                    const props = alert.properties;
+                    const plainEnglish = generatePlainEnglish(props);
+                    
+                    alertsHTML += `
+                        <div class="alert-card">
+                            <div class="alert-type">${props.event}</div>
+                            
+                            <div class="alert-section plain-english">
+                                <div class="section-title">
+                                    💬 Plain English Summary
+                                </div>
+                                <div class="section-content">${plainEnglish}</div>
+                            </div>
+
+                            <div class="alert-section">
+                                <div class="section-title">Official Details</div>
+                                <div class="section-content">${props.headline || props.description.substring(0, 300) + '...'}</div>
+                            </div>
+
+                            <div class="metadata">
+                                <div class="metadata-item">
+                                    <span class="metadata-label">Severity</span>
+                                    <span class="metadata-value">${props.severity || 'Unknown'}</span>
+                                </div>
+                                <div class="metadata-item">
+                                    <span class="metadata-label">Urgency</span>
+                                    <span class="metadata-value">${props.urgency || 'Unknown'}</span>
+                                </div>
+                                <div class="metadata-item">
+                                    <span class="metadata-label">Effective</span>
+                                    <span class="metadata-value">${formatDate(props.effective)}</span>
+                                </div>
+                                ${props.expires ? `
+                                <div class="metadata-item">
+                                    <span class="metadata-label">Expires</span>
+                                    <span class="metadata-value">${formatDate(props.expires)}</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                resultEl.innerHTML = alertsHTML;
+            }
+
+            showElement('result');
+            showElement('emailSignup');
+        }
+
+        // Generate Plain English Translation
+        function generatePlainEnglish(alertProps) {
+            const event = alertProps.event.toLowerCase();
+            const description = alertProps.description || '';
+            const tempMatch = description.match(/(\d+)\s*(?:degrees?|°)/i);
+            const temperature = tempMatch ? tempMatch[1] : null;
+
+            let plainText = '';
+
+            if (event.includes('freeze warning')) {
+                plainText = `<strong>Freezing conditions expected.</strong> Temperatures will drop below 32°F${temperature ? ` (around ${temperature}°F)` : ''}. This can kill sensitive plants and damage exposed pipes. Bring plants indoors, cover outdoor faucets, and let faucets drip to prevent freezing.`;
+            } else if (event.includes('frost advisory')) {
+                plainText = `<strong>Frost is likely to form.</strong> Temperatures will drop to around 32-36°F. Tender plants may be damaged. Cover or bring in sensitive plants overnight.`;
+            } else if (event.includes('hard freeze warning')) {
+                plainText = `<strong>Hard freeze coming - very cold!</strong> Temperatures will fall well below 32°F${temperature ? ` (around ${temperature}°F)` : ''}. This will kill most vegetation and can burst pipes. Take immediate action to protect plants and plumbing.`;
+            } else if (event.includes('freeze watch')) {
+                plainText = `<strong>Freezing conditions are possible.</strong> There's a chance temperatures could drop below 32°F. Start preparing - monitor forecasts and be ready to protect plants and pipes.`;
+            } else {
+                plainText = `<strong>Cold weather alert.</strong> Temperatures will drop significantly. Take precautions to protect plants, pipes, and outdoor equipment.`;
+            }
+
+            if (alertProps.effective) {
+                const effectiveDate = new Date(alertProps.effective);
+                const now = new Date();
+                
+                if (effectiveDate > now) {
+                    const hours = Math.round((effectiveDate - now) / (1000 * 60 * 60));
+                    if (hours < 24) {
+                        plainText += ` <strong>Starts in ${hours} hour${hours !== 1 ? 's' : ''}.</strong>`;
+                    } else {
+                        plainText += ` <strong>Starts ${formatDate(alertProps.effective)}.</strong>`;
+                    }
+                } else {
+                    plainText += ` <strong>Already in effect.</strong>`;
+                }
+            }
+
+            return plainText;
+        }
+
+        // Format Date/Time
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric', 
+                hour: 'numeric', 
+                minute: '2-digit'
+            });
+        }
+
+        // Email Subscription
+        async function subscribeEmail(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('emailInput').value;
+            const subscribeBtn = document.getElementById('subscribeBtn');
+            
+            if (!currentZipCode) {
+                alert('Please check alerts for a ZIP code first.');
+                return;
+            }
+
+            subscribeBtn.disabled = true;
+            subscribeBtn.textContent = 'Subscribing...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/subscribe`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        zipCode: currentZipCode
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Subscription failed');
+                }
+
+                // Show success message
+                showElement('emailSuccess');
+                document.getElementById('emailForm').reset();
+                
+                setTimeout(() => {
+                    hideElement('emailSuccess');
+                }, 5000);
+
+            } catch (error) {
+                alert(error.message || 'Failed to subscribe. Please try again.');
+            } finally {
+                subscribeBtn.disabled = false;
+                subscribeBtn.textContent = 'Subscribe';
+            }
+        }
+    </script>
+</body>
+</html>
